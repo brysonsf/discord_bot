@@ -8,6 +8,6 @@ module.exports = {
 		.setDescription('Replies with Pong!'),
 	async execute(interaction) { 
 		// functionality to run from our event handler when the command is used.
-		await interaction.reply('Pong!');
+		await interaction.reply({content:'Pong!', ephemeral: true});
 	},
 };
