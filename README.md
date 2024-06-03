@@ -7,3 +7,7 @@ created using node.js
 run `node deploy-commands.js` to redeploy commands before running the bot.
 
 run `node .` to activate the bot.
+
+## Planned/Todo:
+ - weekly availability calendar
+ - card themes for commander
