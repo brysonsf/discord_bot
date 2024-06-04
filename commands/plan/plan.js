@@ -1,16 +1,16 @@
-const { ComponentType, EmbedBuilder , SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, codeBlock } = require('discord.js');
-const emojis = {
-    ohyea: '⏫',
-    no: '👤',
-};
+const { ComponentType, EmbedBuilder , SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, codeBlock, time } = require('discord.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('plan')
 		.setDescription('Provides information about the bots found on the server and their usages.')
         .addStringOption(option =>
-            option.setName('date')
-                .setDescription('The date to schedule this for (ex/ 05 October 2011)')
+            option.setName('month')
+                .setDescription('The month to schedule this for (ex/ 08 === October)')
+                .setRequired(true))
+        .addStringOption(option =>
+            option.setName('day')
+                .setDescription('The day to schedule this for (ex/ 0->31)')
                 .setRequired(true))
         .addStringOption(option =>
             option.setName('time')
@@ -22,28 +22,39 @@ module.exports = {
                 .setRequired(true)
         ),
 	async execute(interaction) {
-        //const eventChannel = await interaction.client.channels.fetch('1247313316578070599');
-        
-        const dateOfPlay = interaction.options.getString('date') + ' ';
-        const timeOfPlay = interaction.options.getString('time') + ' ';
+        const monthVal = interaction.options.getString('month');
+        const dayVal = interaction.options.getString('day');
+        const timeVal = interaction.options.getString('time');
+        let hour = Number(timeVal.slice(0,2))+4;
+        let min = Number(timeVal.slice(3,timeVal.length));
         const pollTime = interaction.options.getString('duration');
-        const highlighted = codeBlock('js', dateOfPlay);
-        
-        /* below date time ISO conversion not working, need ISO for google cal implementation
-        const date = new Date(dateOfPlay + timeOfPlay + ' AST');
-        const ISOTime = date.toISOString();
+        // just update year when its 2025
+        // remove 1 from month to account for offsets
+        // year, month, day, hour, minute, second
+        let event = new Date(2024, monthVal-1, dayVal, hour, min, 0);
+        const monthName = event.toLocaleString('default', { month: 'long' });
 
-        const d = new Date(); // Create a new Date object with the current date and time
-        const isoString = d.toISOString(); // Convert the Date object to an ISO string
-        console.log(isoString); // Output: 2024-06-03T21:33:10.000Z
-        console.log(ISOTime);
-        let gCal = 'http://www.google.com/calendar/event?action=TEMPLATE&text=Commander%20Sesh&dates=' + ISOTime + '&details=Commander?%20I%20hardly%20knower!%20RSVP%20here!&location=5217%South%20St';
-        */
+        let ISODateNoDashesNoColonsNoDecimalNoMilliseconds = new Date(2024, monthVal-1, dayVal, hour, min, 0).toISOString()
+        .split("-").join("")
+        .split(".").join("")
+        .split(":").join("")
+        .slice(0,15).concat("Z");
+        // 3 hour session by default
+        let ISOEnding = new Date(2024, monthVal-1, dayVal, hour+4, min, 0).toISOString()
+        .split("-").join("")
+        .split(":").join("")
+        .split(".").join("")
+        .slice(0,15).concat("Z");
+
+        // day is incrememnting
+        let gCal = 'https://www.google.com/calendar/render?action=TEMPLATE&text=Commander+Sesh&details=Commander%3F+I+hardly+knower%21+RSVP+here%21&location=5217+South+St&dates=' + ISODateNoDashesNoColonsNoDecimalNoMilliseconds + '/'+ ISOEnding;
+        const fullDateString = monthName + ' ' + dayVal + ' ' + timeVal;
+        const highlighted = codeBlock('js', fullDateString);
+        
         const exampleEmbed = new EmbedBuilder()
             .setColor(0x0099FF)
             .setTitle('Commander Sesh')
-            //.setURL(gCal)
-            .setURL('https://github.com/brysonsf')
+            .setURL(gCal)
             .setDescription('Commander? I hardly knower! RSVP here!')
             .setThumbnail('https://i.imgur.com/KJkSGXI.jpeg')
             .addFields(
@@ -66,7 +77,7 @@ module.exports = {
 			.addComponents(confirm, cancel);
 
 		const response = await interaction.reply({
-			content: 'event for date/time: ' + dateOfPlay,
+			content: 'event for date/time: ' + fullDateString,
 			components: [row],
             embeds: [exampleEmbed]
 		});
