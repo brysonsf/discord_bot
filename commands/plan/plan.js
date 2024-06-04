@@ -22,12 +22,27 @@ module.exports = {
                 .setRequired(true)
         ),
 	async execute(interaction) {
-        const monthVal = interaction.options.getString('month');
-        const dayVal = interaction.options.getString('day');
+        const monthVal = Number(interaction.options.getString('month'));
+        const dayVal = Number(interaction.options.getString('day'));
         const timeVal = interaction.options.getString('time');
-        let hour = Number(timeVal.slice(0,2))+4;
+        let hour = Number(timeVal.slice(0,2));
         let min = Number(timeVal.slice(3,timeVal.length));
         const pollTime = interaction.options.getString('duration');
+        
+        // if Daylight Savings, +1 more to hour
+        if(monthVal<3 || monthVal>11){ // if mar or after
+            hour = hour + 1;
+        }
+        else if(monthVal===11){
+                if(dayVal>3){ // if nov 3 or later
+                    hour = hour + 1;
+                }
+        }else if(monthVal===3){
+            if(dayVal<10){ // if mar 10 or earlier
+                hour = hour + 1;
+            }
+        }
+        hour = hour + 3;
         // just update year when its 2025
         // remove 1 from month to account for offsets
         // year, month, day, hour, minute, second
