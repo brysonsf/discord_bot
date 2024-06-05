@@ -1,4 +1,3 @@
-// colors: W(white) R(red) B(black) U(blue) G(green) 
 const { SlashCommandBuilder, blockQuote, EmbedBuilder } = require('discord.js');
 
 module.exports = {
@@ -47,15 +46,19 @@ module.exports = {
                 'B': 'Black',
             }
             let embedColour = [];
+            let description = 'Color Identity: ';
+            
             console.log(cardInfo);
+
             cardInfo.color_identity.forEach(color=>{
-                console.log(colorIdentities[color]);
                 // red green blue white red
+                description += colorIdentities[color] + ' ';
                 embedColour.push(colorIdentities[color]);
             });
             const exampleEmbed = new EmbedBuilder()
                 .setColor('Grey')
                 .setTitle(commanderName)
+                .setDescription(description)
                 .setURL(edhCard)
                 .addFields(
                     { name: 'Themes', value: highlighted},
@@ -67,7 +70,6 @@ module.exports = {
                     .setColor(embedColour[0]);
             }else{
                 let x = Math.ceil(Math.random() * 5); // max color identity is 5 (not counting colorless) pick one at random
-                console.log(x);
                 if(x>embedColour.length-1){
                     x = 0; // take first color if we go outside of colors
                 }
