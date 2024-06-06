@@ -85,15 +85,132 @@ module.exports = {
             { name: 'Inline field title', value: manaImageLinks['1'], inline: true },
         )
         .setImage(manaImageLinks['20']);
-
         */
-        // gonna get colors from server emoji's wont be able to fit all of them there
 
         const commanderName = interaction.options.getString('name');
         const edhCommander = commanderName.replace(/\s/g,"-");
-		let linkToEDH = 'https://json.edhrec.com/pages/commanders/' + edhCommander + '.json';
-		let edhCard = 'https://edhrec.com/commanders/' + edhCommander;
+		
+        let linkToEDH = 'https://json.edhrec.com/pages/commanders/' + edhCommander + '.json';
+        let scryfallAPIURL = 'https://api.scryfall.com/cards/search?q=' + edhCommander;
+        let edhCard = 'https://edhrec.com/commanders/' + edhCommander;
+        
         const edhRecData = await (await fetch(linkToEDH)).json();
+        
+        let cardInfo;
+        cardInfo = edhRecData.container.json_dict.card;
+
+        let description =``;
+        const colorIdentities = {
+            'U': 'Blue',
+            'G': 'Green',
+            'R': 'Red',
+            'W': 'White',
+            'B': 'Black',
+        }
+        let embedColour = [];
+        cardInfo.color_identity.forEach(manaPib=>{    
+            embedColour.push(colorIdentities[manaPib]);
+        });
+
+        // Make a GET request
+        await fetch(scryfallAPIURL)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+                })
+            .then(rawData => {
+                // errors on zero thouh !response.ok
+                if(rawData.total_cards>1){
+                    rawData.data.forEach(card =>{
+                        if(commanderName.toString().toUpperCase() === card.name.toUpperCase()){ // full case matching
+                            // console.log(card.type_line); console.log(cardInfo.type); can compare types if needed
+                            for(let i=0; i<card.mana_cost.length; i++){
+                                if(card.mana_cost.charAt(i)!=='{' && card.mana_cost.charAt(i)!=='}' && card.mana_cost.charAt(i)!=='-' && card.mana_cost.charAt(i)!==','){
+                                    const color = card.mana_cost.charAt(i);
+                                     // check if there is a numba
+                                    if (isNaN(color)){
+                                        if(color==='R'){
+                                            description+= `<:R_:1248286725189402655> `;
+                                        }else if(color==='W'){
+                                            description+= `<:W_:1248286727261388974> `;
+                                        }else if(color==='G'){
+                                            description+= `<:G_:1248286723990093885> `;
+                                        }else if(color==='B'){
+                                            description+= `<:B_:1248286671007387742> `;
+                                        }else if(color==='U'){
+                                            description+= `<:U_:1248286726275862528> `;
+                                        }else if(color==='C'){
+                                            description+= `<:C_:1248286854105796771> `;
+                                        }
+                                    }else{
+                                        // check if there is a numba
+                                        if (!isNaN(color)){
+                                            if(color === 1){
+                                                description += `<:1_:1248325191818543204> `;
+                                            } else if(color === 2){
+                                                description += `<:2_:1248325192921387050> `;
+                                            } else if(color === 3){
+                                            }
+                                        }
+                                    }
+            
+                                }
+                            }
+                        }
+                        
+                    })
+                }else{
+                    let card = rawData.data[0];
+                    let cardNameNoGrammar = ``;
+                    for(let i=0; i<card.name.length; i++){
+                        if(card.name.charAt(i)!==','){
+                            cardNameNoGrammar+= card.name.charAt(i);
+                        }
+                    }
+                    if(commanderName.toUpperCase() === cardNameNoGrammar.toUpperCase()){ // full case matching
+                        // console.log(card.type_line); console.log(cardInfo.type); can compare types if needed
+                        for(let i=0; i<card.mana_cost.length; i++){
+                            if(card.mana_cost.charAt(i)!=='{' && card.mana_cost.charAt(i)!=='}' && card.mana_cost.charAt(i)!=='-' && card.mana_cost.charAt(i)!==','){
+                                const color = card.mana_cost.charAt(i);
+                                    // check if there is a numba
+                                if (isNaN(color)){
+                                    if(color==='R'){
+                                        description+= `<:R_:1248286725189402655> `;
+                                    }else if(color==='W'){
+                                        description+= `<:W_:1248286727261388974> `;
+                                    }else if(color==='G'){
+                                        description+= `<:G_:1248286723990093885> `;
+                                    }else if(color==='B'){
+                                        description+= `<:B_:1248286671007387742> `;
+                                    }else if(color==='U'){
+                                        description+= `<:U_:1248286726275862528> `;
+                                    }else if(color==='C'){
+                                        description+= `<:C_:1248286854105796771> `;
+                                    }
+                                }else{
+                                    // check if there is a numba
+                                    if (!isNaN(color)){
+                                        if(color === '1'){
+                                            description += `<:1_:1248325191818543204> `;
+                                        } else if(color === '2'){
+                                            description += `<:2_:1248325192921387050> `;
+                                        } else if(color === '3'){
+                                        }
+                                    }
+                                }
+        
+                            }
+                        }
+                    }
+                    
+                }
+                })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
         if(edhRecData.code){
             await interaction.reply({content:'Commander ' + commanderName + ' cannot be found.'});
         }else{
@@ -106,27 +223,6 @@ module.exports = {
                 strBuilt+= theme.themeName + ' ' + theme.themeCount + '\n';
             });
             const highlighted = blockQuote(strBuilt);
-
-            let cardInfo;
-            cardInfo = edhRecData.container.json_dict.card;
-            const colorIdentities = {
-                'U': 'Blue',
-                'G': 'Green',
-                'R': 'Red',
-                'W': 'White',
-                'B': 'Black',
-            }
-
-            // <a:NAME:ID>
-
-            let embedColour = [];
-            let description = `Color Identity: `;
-            cardInfo.color_identity.forEach(color=>{
-                // red green blue white red
-                description += colorIdentities[color] + ` `;
-                embedColour.push(colorIdentities[color]);
-            });
-
             const exampleEmbed = new EmbedBuilder()
                 .setColor('Grey')
                 .setTitle(commanderName)
@@ -144,6 +240,9 @@ module.exports = {
                 let x = Math.ceil(Math.random() * 5); // max color identity is 5 (not counting colorless) pick one at random
                 if(x>embedColour.length-1){
                     x = 0; // take first color if we go outside of colors
+                }
+                if(embedColour[x]==='Black'){
+                    embedColour[x] = 'NotQuiteBlack';
                 }
                 exampleEmbed
                     .setColor(embedColour[x]);
