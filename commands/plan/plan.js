@@ -6,7 +6,7 @@ module.exports = {
 		.setDescription('Provides information about the bots found on the server and their usages.')
         .addStringOption(option =>
             option.setName('month')
-                .setDescription('The month to schedule this for (ex/ 08 === October)')
+                .setDescription('The month to schedule this for (ex/ 10 === October)')
                 .setRequired(true))
         .addStringOption(option =>
             option.setName('day')
