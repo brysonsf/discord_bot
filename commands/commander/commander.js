@@ -5,7 +5,7 @@ module.exports = {
 		.setName('commander')
         .addStringOption(option =>
             option.setName('name')
-                .setDescription('The name of the Commander to lookup on EDHRec. Please let me know of any mana symbols you notice missing!')
+                .setDescription('The name of the Commander to lookup on Scryfall/EDHRec.')
                 .setRequired(true))
 		.setDescription('Provides information about commanders sourced from Scryfall + EDHRec.'),
 	async execute(interaction) {
