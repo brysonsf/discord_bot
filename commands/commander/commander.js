@@ -131,6 +131,18 @@ module.exports = {
                                 cardNameNoGrammar+= card.name.charAt(i);
                             }
                         }
+                        for(let i=0; i<card.oracle_text.length; i++){
+                            if(card.oracle_text.charAt(i) === '{'){
+                                i++; // move to mana letter
+                                oracle += convertToEmoji(card.oracle_text.charAt(i));
+                                i++; // move to the last bracket (will increment away) 
+                            } else {
+                                oracle += card.oracle_text.charAt(i);
+                                if(card.oracle_text.charAt(i) === '\n'){
+                                    oracle += '\n\n';
+                                }
+                            }
+                        }
                         if(commanderName.toUpperCase() === cardNameNoGrammar.toUpperCase()){ // full case matching
                             // console.log(card.type_line); console.log(cardInfo.type); can compare types if needed
                             for(let i=0; i<card.mana_cost.length; i++){
@@ -146,10 +158,7 @@ module.exports = {
                     console.error('Error:', error);
                 });
 
-            description+= manaLogos + '\n' + oracle; 
-            if(edhRecData.code){
-                await interaction.reply({content:'Commander ' + commanderName + ' cannot be found.'});
-            }else{
+           
                 let themes = [];
                 edhRecData.panels.tribelinks.themes.forEach(theme =>{
                     themes.push({themeName: theme.value, themeCount: theme.count});
@@ -159,10 +168,11 @@ module.exports = {
                     strBuilt+= theme.themeName + ' ' + theme.themeCount + '\n';
                 });
                 const highlighted = blockQuote(strBuilt);
+                const oracleOfDelphi = blockQuote(oracle);
                 const exampleEmbed = new EmbedBuilder()
                     .setColor('Grey')
-                    .setTitle(commanderName)
-                    .setDescription(description)
+                    .setTitle(commanderName + ' ' + manaLogos)
+                    .setDescription(oracleOfDelphi)
                     .setURL(edhCard)
                     .addFields(
                         { name: 'Themes', value: highlighted},
@@ -186,7 +196,7 @@ module.exports = {
                 
                 await interaction.reply({content:'Searching Commander details: ' + commanderName + '...',  
                 embeds: [exampleEmbed]});
-            }
+            
         }
 	},
 };

@@ -3,7 +3,7 @@ const { ComponentType, EmbedBuilder , SlashCommandBuilder, ActionRowBuilder, But
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('plan')
-		.setDescription('Provides information about the bots found on the server and their usages.')
+		.setDescription('Provides an event planning stucture.')
         .addStringOption(option =>
             option.setName('month')
                 .setDescription('The month to schedule this for (ex/ 10 === October)')
