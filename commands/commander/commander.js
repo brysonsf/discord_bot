@@ -5,9 +5,9 @@ module.exports = {
 		.setName('commander')
         .addStringOption(option =>
             option.setName('name')
-                .setDescription('The name of the Commander to lookup on EDHRec (ex/ kwain the itinerant')
+                .setDescription('The name of the Commander to lookup on EDHRec. Please let me know of any mana symbols you notice missing!')
                 .setRequired(true))
-		.setDescription('Provides information about commanders sourced from EDHRec.'),
+		.setDescription('Provides information about commanders sourced from Scryfall + EDHRec.'),
 	async execute(interaction) {
         let manaLogos =``;
         const colorIdentities = {
@@ -58,6 +58,8 @@ module.exports = {
             cardInfo = scryfallData.data;
             function convertToEmoji(color){
                 // check if there is a numba
+                console.log(color);
+                console.log(typeof(color));
                 let converted = ``;
                 if (isNaN(color)){
                     if(color==='R'){
@@ -76,13 +78,42 @@ module.exports = {
                         converted+= `<:T_:1248655986743574621>`;
                     }else if(color==='X'){
                         converted+= `<:X_:1248325197115953255> `;
-                    } else if(color==='W/U'){
+                    }
+                    // hybrid mana
+                    else if(color==='W/U'){
                         converted += `<:WU:1250842026312990877> `;
                     } else if(color==='B/G'){
                         converted += `<:BG:1250841783840014427> `;
                     } else if(color==='W/B'){
                         converted += `<:WB:1250842021724422214> `;
+                    } else if(color==='2/B'){
+                        converted += `<:2B:1250841777028599891> `;
+                    } else if(color==='2/G'){
+                        converted += `<:2G:1250841778601594941> `;
+                    } else if(color==='2/R'){
+                        converted += `<:2R:1250841779885051955> `;
+                    } else if(color==='2/U'){
+                        converted += `<:2U:1250841780736364625> `;
+                    } else if(color==='2/W'){
+                        converted += `<:2W:1250841782502162502> `;
                     }
+                    // phyrexian mana
+                    else if(color==='B/P'){
+                        converted += `<:BP:1250841819655311360> `;
+                    }
+                    else if(color==='U/P'){
+                        converted += `<:UP:1250841909342240952> `;
+                    }
+                    else if(color==='G/P'){
+                        converted += `<:GP:1250841858335047741> `;
+                    }
+                    else if(color==='R/P'){
+                        converted += `<:RP:1250841902186758295> `;
+                    }
+                    else if(color==='W/P'){
+                        converted += `<:WP:1250842025054568509> `;
+                    }
+                    // 
                 }else{
                     if(color === '0'){
                         converted += `<:0_:1248286854105796771> `;
@@ -96,8 +127,6 @@ module.exports = {
                         converted += `<:4_:1248325195446354112> `;
                     } else if(color === '5'){
                         converted += `<:5_:1248325196465704970> `;
-                    } else if(color==='2/B'){
-                        converted += `<:2B:1250841777028599891> `;
                     }
                 }
                 return converted;
@@ -115,10 +144,10 @@ module.exports = {
                         for(let i=0; i<card.oracle_text.length; i++){
                             if(card.oracle_text.charAt(i) === '{'){
                                 i++; // move to mana letter
-                                let hold;
-                                if(card.oracle_text.charAt(i+1)==="/"){
+                                let hold = '';
+                                if(card.oracle_text.charAt(i+1)==='/'){
                                     // this means it is a split letter 2/B
-                                    hold = card.oracle_text.charAt(i)+card.oracle_text.charAt(i+1)+card.oracle_text.charAt(i+2);
+                                    hold += card.oracle_text.charAt(i)+card.oracle_text.charAt(i+1)+card.oracle_text.charAt(i+2);
                                     i++; // skip over to excess slash
                                     i++;// move past to next letter
                                     i++;// move past to bracket close (skips by increment)
@@ -135,22 +164,21 @@ module.exports = {
                                 }
                             }
                         }
-                        if(commanderName.toString().toUpperCase() === card.name.toUpperCase()){ // full case matching
-                            for(let i=0; i<card.mana_cost.length; i++){
+                             for(let i=0; i<card.mana_cost.length; i++){
                                 if(card.mana_cost.charAt(i)!=='{' && card.mana_cost.charAt(i)!=='}' && card.mana_cost.charAt(i)!=='-' && card.mana_cost.charAt(i)!==','){
-                                    let color;
+                                    let color = '';
                                     if(card.mana_cost.charAt(i+1)==='/'){
-                                        color = card.mana_cost.charAt(i)+card.mana_cost.charAt(i+1)+card.mana_cost.charAt(i+2);
+                                        color += card.mana_cost.charAt(i)+card.mana_cost.charAt(i+1)+card.mana_cost.charAt(i+2);
                                         i++;
                                         i++;
                                         i++;
                                     }else{
-                                        color = card.mana_cost.charAt(i);
+                                        color += card.mana_cost.charAt(i);
                                     }
                                     manaLogos += convertToEmoji(color);
                                 }
                             }
-                        }
+                        
                     })
                 }else{
                     card = rawData;
@@ -184,14 +212,14 @@ module.exports = {
                     }
                     for(let i=0; i<card.mana_cost.length; i++){
                             if(card.mana_cost.charAt(i)!=='{' && card.mana_cost.charAt(i)!=='}' && card.mana_cost.charAt(i)!=='-' && card.mana_cost.charAt(i)!==','){
-                                let color;
+                                let color = '';
                                 if(card.mana_cost.charAt(i+1)==='/'){
-                                    color = card.mana_cost.charAt(i)+card.mana_cost.charAt(i+1)+card.mana_cost.charAt(i+2);
+                                    color += card.mana_cost.charAt(i)+card.mana_cost.charAt(i+1)+card.mana_cost.charAt(i+2);
                                     i++;
                                     i++;
                                     i++;
                                 }else{
-                                    color = card.mana_cost.charAt(i);
+                                    color += card.mana_cost.charAt(i);
                                 }
                                 manaLogos += convertToEmoji(color);
                             }
@@ -213,7 +241,10 @@ module.exports = {
                 .setImage(card.image_uris.normal) // first one is the full card
                 .setFooter({ text: commanderName, iconURL: card.image_uris.art_crop }); // the second one is just center image
             
-                if (embedColour.length===1){
+            if (embedColour.length===1){
+                if(embedColour[0]==='Black'){
+                    embedColour[0] = 'NotQuiteBlack';
+                }
                 exampleEmbed
                     .setColor(embedColour[0]);
             }else{
