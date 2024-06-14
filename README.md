@@ -19,5 +19,7 @@ https://panel.breezehost.xyz/server/5ae48d37
 - If you make changes, you will need to restart the breezehost server in order to see those changes reflected in the live version.
 
 ## Planned/Todo:
+ - change plan command to be more easily used
+  - track button clicks for available/unavailable players
  - weekly availability calendar
  - include STFP connection for transferring up to date (or just raw upload to site on good changes)
