@@ -20,3 +20,4 @@ https://panel.breezehost.xyz/server/5ae48d37
 
 ## Planned/Todo:
  - weekly availability calendar
+ - include STFP connection for transferring up to date (or just raw upload to site on good changes)
