@@ -144,7 +144,6 @@ module.exports = {
             if (scryfallData.total_cards === 1) {
                 // scryfall found the card
                 cardInfo = scryfallData.data[0];
-                console.log(cardInfo);
                 cardInfo.color_identity.forEach((manaPib) => {
                     embedColour.push(colorIdentities[manaPib]);
                 });
@@ -208,7 +207,6 @@ module.exports = {
                 // scryfall found multiple
                 cardInfo = scryfallData.data; // no [0], many cards found
                 cardInfo.forEach((rawData) => {
-                    console.log(rawData);
                     nameList.push(rawData.name);
                 });
             }
@@ -223,12 +221,22 @@ module.exports = {
             const edhRecData = await (await fetch(linkToEDH)).json();
             let themes = [];
             if (edhRecData.code !== 403) {
-                edhRecData.panels.tribelinks.themes.forEach((theme) => {
-                    themes.push({
-                        themeName: theme.value,
-                        themeCount: theme.count,
+                let tribeHold = edhRecData.panels.tribelinks;
+                if(tribeHold.length>1){ // if one exists, it is the dif format
+                    tribeHold.forEach((theme) => {
+                        themes.push({
+                            themeName: theme.value,
+                            themeCount: theme.count,
+                        });
                     });
-                });
+                }else{ 
+                    tribeHold.themes.forEach((theme) => {
+                        themes.push({
+                            themeName: theme.value,
+                            themeCount: theme.count,
+                        });
+                    });
+                }
                 themes.forEach((theme) => {
                     strBuilt += theme.themeName + " " + theme.themeCount + "\n";
                 });
@@ -279,8 +287,6 @@ module.exports = {
                 }
             }
             await interaction.reply({
-                content:
-                    "Searching Commander details: " + commanderName + "...",
                 embeds: [exampleEmbed],
             });
         }
