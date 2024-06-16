@@ -1,4 +1,4 @@
-const { ComponentType, EmbedBuilder , SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, codeBlock, time } = require('discord.js');
+const { ComponentType, EmbedBuilder , SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, codeBlock, time, blockQuote } = require('discord.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -15,19 +15,14 @@ module.exports = {
         .addStringOption(option =>
             option.setName('time')
                 .setDescription('The time to schedule this for (ex/ 14:48)')
-                .setRequired(true))
-        .addStringOption(option =>
-            option.setName('duration')
-                .setDescription('The amount of time (in milliseconds) to schedule this for (ex/ 604800000 === 1 week')
-                .setRequired(true)
-        ),
+                .setRequired(true)),
 	async execute(interaction) {
         const monthVal = Number(interaction.options.getString('month'));
         const dayVal = Number(interaction.options.getString('day'));
         const timeVal = interaction.options.getString('time');
         let hour = Number(timeVal.slice(0,2));
         let min = Number(timeVal.slice(3,timeVal.length));
-        const pollTime = interaction.options.getString('duration');
+        const pollTime = 604800000; // 1 week default length
         
         // if Daylight Savings, +1 more to hour
         if(monthVal<3 || monthVal>11){ // if mar or after
@@ -92,15 +87,57 @@ module.exports = {
 			.addComponents(confirm, cancel);
 
 		const response = await interaction.reply({
-			content: 'event for date/time: ' + fullDateString,
+			content: 'Whos in ' + fullDateString + '?',
 			components: [row],
             embeds: [exampleEmbed]
 		});
 
         const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button, time: pollTime });
 
+        let confirmees = [];
+        let deniers = [];
+
         collector.on('collect', i => {
-            i.reply(`${i.user.id} clicked on the ${i.customId} button.`);
+            let yesMan = '';
+            let noMan = '';
+            if(i.customId === 'confirm'){
+
+                if(confirmees.indexOf(i.user.globalName)===-1){
+                    if(deniers.indexOf(i.user.globalName!==-1)){
+                        let hold = '';
+                        deniers.forEach(swap =>{
+                            if(swap!==i.user.globalName){
+                                hold+= '\n' + swap;
+                            }
+                        });
+                        noMan = hold;
+                    }
+                    confirmees.push(i.user.globalName);
+                    yesMan+= i.user.globalName;
+
+                }
+            }else if(i.customId === 'cancel'){
+                if(deniers.indexOf(i.user.globalName)===-1){
+                    if(confirmees.indexOf(i.user.globalName!==-1)){
+                        let hold = '';
+                        confirmees.forEach(swap =>{
+                            if(swap!==i.user.globalName){
+                                hold+= '\n' + swap;
+                            }
+                        });
+                        yesMan = hold;
+                    }
+                    deniers.push(i.user.globalName);
+                    noMan+= i.user.globalName;
+                }
+            }
+            //i.reply(fullDateString + ' RSVP log: Yes: ' + yesMan + '  No: ' + noMan);
+            //Update the content of a message
+            let msg = fullDateString + ' RSVP log: ';
+            const replies = blockQuote('\nYes: ' + yesMan + '\nNo: ' + noMan);
+            i.message.edit(msg + replies)
+            .then(msg => console.log(`Updated the content of a message to ${msg.content}`))
+            .catch(console.error);
         });
 
         collector.on('end', collected => {
