@@ -115,10 +115,11 @@ module.exports = {
         const weeklyCollector = weekResponse.createMessageComponentCollector({ componentType: ComponentType.Button, time: 604800000}); // 1 week
 
         weeklyCollector.on('collect', i => {
+            console.log(i.user);
             for(let k=0; k<5; k++){ 
                 if(msg[k][0]===i.customId){
                     if(msg[k].indexOf(i.user.globalName)===-1){
-                        msg[k].push(i.user.globalName);
+                        msg[k].push(i.user.globalName ?? i.user.username);
                     }else{
                         if (msg[k].indexOf(i.user.globalName) > -1) { // only splice array when item is found
                             msg[k].splice(msg[k].indexOf(i.user.globalName), 1); // 2nd parameter means remove one item only

@@ -21,9 +21,7 @@ module.exports = {
         const dayVal = Number(interaction.options.getString('day'));
         const timeVal = interaction.options.getString('time');
         let hour = Number(timeVal.slice(0,2));
-        let min = Number(timeVal.slice(3,timeVal.length));
-        const pollTime = 604800000; // 1 week default length
-        
+        let min = Number(timeVal.slice(3,timeVal.length));        
         // if Daylight Savings, +1 more to hour
         if(monthVal<3 || monthVal>11){ // if mar or after
             hour = hour + 1;
@@ -92,7 +90,7 @@ module.exports = {
             embeds: [exampleEmbed]
 		});
 
-        const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button, time: pollTime });
+        const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button, time: 604800000 }); // 1 week
 
         let confirmees = [];
         let deniers = [];
@@ -100,35 +98,35 @@ module.exports = {
         collector.on('collect', i => {
             let yesMan = '';
             let noMan = '';
+            let username = i.user.globalName ?? i.user.username;
             if(i.customId === 'confirm'){
-
-                if(confirmees.indexOf(i.user.globalName)===-1){
-                    if(deniers.indexOf(i.user.globalName!==-1)){
+                if(confirmees.indexOf(username)===-1){
+                    if(deniers.indexOf(username!==-1)){
                         let hold = '';
                         deniers.forEach(swap =>{
-                            if(swap!==i.user.globalName){
+                            if(swap!==username){
                                 hold+= '\n' + swap;
                             }
                         });
                         noMan = hold;
                     }
-                    confirmees.push(i.user.globalName);
-                    yesMan+= i.user.globalName;
+                    confirmees.push(username);
+                    yesMan+= username;
 
                 }
             }else if(i.customId === 'cancel'){
-                if(deniers.indexOf(i.user.globalName)===-1){
-                    if(confirmees.indexOf(i.user.globalName!==-1)){
+                if(deniers.indexOf(username)===-1){
+                    if(confirmees.indexOf(username!==-1)){
                         let hold = '';
                         confirmees.forEach(swap =>{
-                            if(swap!==i.user.globalName){
+                            if(swap!==username){
                                 hold+= '\n' + swap;
                             }
                         });
                         yesMan = hold;
                     }
-                    deniers.push(i.user.globalName);
-                    noMan+= i.user.globalName;
+                    deniers.push(username);
+                    noMan+= username;
                 }
             }
             //i.reply(fullDateString + ' RSVP log: Yes: ' + yesMan + '  No: ' + noMan);
