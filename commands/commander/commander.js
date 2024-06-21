@@ -136,6 +136,7 @@ module.exports = {
             });
         } else {
             let oracle = "";
+            let cardType = "";
             let commaless = "";
             let imageLink = [];
             let nameList = [];
@@ -148,7 +149,7 @@ module.exports = {
                     embedColour.push(colorIdentities[manaPib]);
                 });
                 card = cardInfo;
-
+                cardType = card.type_line;
                 imageLink[0] = card.image_uris.normal;
                 imageLink[1] = card.image_uris.art_crop;
                 for (let i = 0; i < card.oracle_text.length; i++) {
@@ -211,16 +212,39 @@ module.exports = {
                 });
             }
 
-            let edhCard = "https://edhrec.com/commanders/" + edhCommander;
             edhCommander = commaless.replace(/\s/g, "-").toLowerCase();
+            let edhCard = "https://edhrec.com/commanders/" + edhCommander;
             linkToEDH =
                 "https://json.edhrec.com/pages/commanders/" +
                 edhCommander +
                 ".json";
             let strBuilt = "";
             const edhRecData = await (await fetch(linkToEDH)).json();
+            
+            //https://json.edhrec.com/pages/partners/the-tenth-doctor.json
+            //get partner details
+            let partners = [];
+            if(oracle.includes('Partner') || oracle.includes('Doctor\'s companion') || cardType === "Legendary Creature — Time Lord Doctor"){
+                let partnerInfo =
+                "https://json.edhrec.com/pages/partners/" +
+                edhCommander +
+                ".json";
+                const edhPartnerData = await (await fetch(partnerInfo)).json();
+                if (edhPartnerData.code !== 403) {
+                    edhPartnerData.partnercounts.forEach(partner =>{
+                        partners.push({name: partner.value, count: partner.count});
+                    });
+                }
+                partners.forEach((partner) => {
+                    strBuilt += partner.name + " " + partner.count + "\n";
+                });
+                strBuilt += "\n";
+            }
+            // get themes
             let themes = [];
-            if (edhRecData.code !== 403) {
+            // partner page: https://edhrec.com/commanders/krark-the-thumbless-sakashima-of-a-thousand-faces
+            if (edhRecData.code !== 403 && edhRecData.panels['tribelinks']) {
+                // get themes
                 let tribeHold = edhRecData.panels.tribelinks;
                 if(tribeHold.length>1){ // if one exists, it is the dif format
                     tribeHold.forEach((theme) => {
@@ -240,13 +264,11 @@ module.exports = {
                 themes.forEach((theme) => {
                     strBuilt += theme.themeName + " " + theme.themeCount + "\n";
                 });
-            } else {
-                strBuilt = "No themes found for this commander.";
             }
+            
             let excess = "";
-            if (nameList.length === 0) {
-                nameList[0] = "No card text found for this commander.";
-            } else {
+            if (nameList.length > 0) {
+                // n extra cards found
                 nameList.forEach((cardName) => {
                     excess += cardName + "\n";
                 });
@@ -255,19 +277,33 @@ module.exports = {
             if (oracle !== "") {
                 oracleOfDelphi = blockQuote(oracle);
             }
-            const highlighted = blockQuote(strBuilt);
-
-            const exampleEmbed = new EmbedBuilder()
+            let exampleEmbed = new EmbedBuilder()
                 .setColor("Grey")
-                .setTitle(commanderName + " " + manaLogos)
+                .setTitle(edhCommander + " " + manaLogos)
                 .setDescription(oracleOfDelphi)
                 .setURL(edhCard)
-                .addFields({ name: "Themes", value: highlighted })
                 .setImage(imageLink[0]) // first one is the full card
                 .setFooter({
                     text: commanderName,
                     iconURL: imageLink[1],
                 }); // the second one is just center image
+            if(strBuilt.length>1024){
+                let tempFill = '';
+                // or i can try to add another field
+                function truncate(str, maxlength) {
+                    return (str.length > maxlength) ?
+                      str.slice(0, maxlength - 1) + '…' : str;
+                }
+                exampleEmbed.addFields({ name: "Themes/Partners", value: blockQuote(truncate(strBuilt, 1020)) });
+                for(let k=1020; k<strBuilt.length; k++){
+                    tempFill+= strBuilt.charAt(k);
+                }
+                if(tempFill!==''){
+                    exampleEmbed.addFields({ name: "Themes/Partners", value: blockQuote(tempFill) });
+                }
+            }else{
+                exampleEmbed.addFields({ name: "Themes/Partners", value: blockQuote(strBuilt) })
+            }
 
             if (embedColour.length === 1) {
                 if (embedColour[0] === "Black") {
