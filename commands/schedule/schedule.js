@@ -3,14 +3,10 @@ const { ComponentType , SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, Bu
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('schedule')
-		.setDescription('Helps schedule meetups on a 5-day basis.')
-        .addStringOption(option =>
-            option.setName('day')
-                .setDescription('The current day when planning the schedule (default: sunday)')
-                .setRequired(false)),
+		.setDescription('Helps schedule meetups on a 5-day basis.'),
 	async execute(interaction) {
-        const dayVal = interaction.options.getString('day') ?? 'sunday';
-		
+        const d = new Date();
+        let dayVal = d.getDay(); //The getDay() method returns the day of the week (from 0 to 6) of a date.
         let weeklyRow = new ActionRowBuilder()
         .addComponents('unknown weekly error');
         const sunday = new ButtonBuilder()
@@ -42,9 +38,8 @@ module.exports = {
 			.setLabel('Saturday')
 			.setStyle(ButtonStyle.Secondary);
 
-        let dayNum = 0;
         let msg = [[],[],[],[],[]];
-        if(dayVal==='sunday'){
+        if(dayVal===0){
             weeklyRow = new ActionRowBuilder()
 			.addComponents(monday, tuesday, wednesday, thursday, friday);
             msg[0].push('monday');
@@ -53,7 +48,7 @@ module.exports = {
             msg[3].push('thursday');
             msg[4].push('friday');
         }
-        else if(dayVal==='monday'){
+        else if(dayVal===1){
             weeklyRow = new ActionRowBuilder()
 			.addComponents(tuesday, wednesday, thursday, friday, saturday);
             msg[0].push('tuesday');
@@ -62,7 +57,7 @@ module.exports = {
             msg[3].push('friday');
             msg[4].push('saturday');
         }
-        else if(dayVal==='tuesday'){
+        else if(dayVal===2){
             weeklyRow = new ActionRowBuilder()
 			.addComponents(wednesday, thursday, friday, saturday, sunday);
             msg[0].push('wednesday');
@@ -71,7 +66,7 @@ module.exports = {
             msg[3].push('saturday');
             msg[4].push('sunday');
         }
-        else if(dayVal==='wednesday'){
+        else if(dayVal===3){
             weeklyRow = new ActionRowBuilder()
 			.addComponents(thursday, friday, saturday, sunday, monday);
             msg[0].push('thursday');
@@ -80,7 +75,7 @@ module.exports = {
             msg[3].push('sunday');
             msg[4].push('monday');
         }
-        else if(dayVal==='thursday'){
+        else if(dayVal===4){
             weeklyRow = new ActionRowBuilder()
 			.addComponents(friday, saturday, sunday, monday, tuesday);
             msg[0].push('friday');
@@ -89,7 +84,7 @@ module.exports = {
             msg[3].push('monday');
             msg[4].push('tuesday');
         }
-        else if(dayVal==='friday'){
+        else if(dayVal===5){
             weeklyRow = new ActionRowBuilder()
 			.addComponents(saturday, sunday, monday, tuesday, wednesday);
             msg[0].push('saturday');
@@ -98,7 +93,7 @@ module.exports = {
             msg[3].push('tuesday');
             msg[4].push('wednesday');
         }
-        else if(dayVal==='saturday'){
+        else if(dayVal===6){
             weeklyRow = new ActionRowBuilder()
 			.addComponents(sunday, monday, tuesday, wednesday, thursday);
             msg[0].push('sunday');
