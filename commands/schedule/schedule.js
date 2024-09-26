@@ -103,10 +103,14 @@ module.exports = {
             msg[4].push('thursday');
         }
 
-        const weekResponse = await(interaction.reply({
-            content: 'Weekly scheduler',
-            components: [weeklyRow]
-        }));
+        //channelID 1288929775846428834
+        let botChannel = "1288929775846428834";
+        const weekResponse = await interaction.guild.channels.cache.get(botChannel).send({components:[weeklyRow]});
+        //interaction.guild.channels.cache.get(botChannel).send('message');
+       // const weekResponse = await(interaction.reply({
+           // content: 'Weekly scheduler',
+           // components: [weeklyRow]
+    //    }));
         const weeklyCollector = weekResponse.createMessageComponentCollector({ componentType: ComponentType.Button, time: 604800000}); // 1 week
 
         weeklyCollector.on('collect', i => {
