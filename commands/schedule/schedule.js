@@ -117,11 +117,13 @@ module.exports = {
             console.log(i.user);
             for(let k=0; k<5; k++){ 
                 if(msg[k][0]===i.customId){
-                    if(msg[k].indexOf(i.user.globalName)===-1){
-                        msg[k].push(i.user.globalName ?? i.user.username);
+                    let fuckSpaceComplexity = i.user.globalName ?? i.user.username;
+
+                    if(msg[k].indexOf(fuckSpaceComplexity)===-1){
+                        msg[k].push(fuckSpaceComplexity);
                     }else{
-                        if (msg[k].indexOf(i.user.globalName) > -1) { // only splice array when item is found
-                            msg[k].splice(msg[k].indexOf(i.user.globalName), 1); // 2nd parameter means remove one item only
+                        if (msg[k].indexOf(fuckSpaceComplexity) > -1) { // only splice array when item is found
+                            msg[k].splice(msg[k].indexOf(fuckSpaceComplexity), 1); // 2nd parameter means remove one item only
                         }
                     }
                 }
